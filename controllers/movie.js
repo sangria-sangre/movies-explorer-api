@@ -12,22 +12,29 @@ module.exports.getMovies = (req, res, next) => {
       }
       return;
     });
-    return arr;
+    if(arr) return arr;
+    throw new NotFoundError404('404: Данные не найдены');
   })
   .then((movies) => {
     res.status(200).send(movies);
   })
-  .catch(next);
+  .catch((err) => {
+    if (err.name === 'CastError') {
+      return next(new BadRequestError400('400: Передан некорректный id.'));
+    } else {
+      return next(err);
+    }
+  });
 };
 
 module.exports.createMovie = (req, res, next) => {
   const { country, director, duration, year, description, image, trailerLink, thumbnail, movieId, nameRU, nameEN } = req.body;
   const owner = req.user._id;
   movieSchema.create({ country, director, duration, year, description, image, trailerLink, thumbnail, movieId, nameRU, nameEN, owner })
-    .then((movie) => res.status(201).send(movie))
+    .then(() => res.status(201).send({ message: 'Фильм добавлен успешно.'}))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return next(new BadRequestError400('Переданы некорректные данные при создании фильма.'));
+        return next(new BadRequestError400('400: Переданы некорректные данные при создании фильма.'));
       } else {
         return next(err);
       }
@@ -39,18 +46,18 @@ module.exports.deleteMovie = (req, res, next) => {
   movieSchema.findById(movieId)
     .then((movie) => {
       if (!movie) {
-        throw new NotFoundError404('Фильм по указанному _id не найден.');
+        throw new NotFoundError404('404: Фильм по указанному _id не найден.');
       }
       if (!movie.owner.equals(req.user._id)) {
-        return next(new ForbiddenError403('Фильм невозможно удалить.'));
+        return next(new ForbiddenError403('403: Фильм невозможно удалить.'));
       }
-      return movie.deleteOne().then(() => res.send({ message: 'Фильм был удален.' }));
+      return movie.deleteOne().then(() => res.send({ message: 'Фильм удалён успешно.' }));
     })
     .catch((err) => {
       if (err.message === 'NotValidId') {
-        return next(new NotFoundError404('Фильм по указанному _id не найден.'));
+        return next(new NotFoundError404('404: Фильм по указанному _id не найден.'));
       } else if (err.name === 'CastError') {
-        return next(new BadRequestError400('Фильм с указанным _id не найден.'));
+        return next(new BadRequestError400('400: Фильм с указанным _id не найден.'));
       } else {
         return next(err);
       }

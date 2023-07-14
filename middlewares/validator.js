@@ -4,17 +4,17 @@ const number = /^\d+$/;
 
 module.exports.createMovieValidate = celebrate({
   body: Joi.object().keys({
-    country: Joi.string().required().min(2),
-    director: Joi.string().required().min(2),
-    duration: Joi.string().required().min(2).pattern(number),
-    year: Joi.string().required().min(2),
-    description: Joi.string().required().min(2),
+    country: Joi.string().required(),
+    director: Joi.string().required(),
+    duration: Joi.string().required().pattern(number),
+    year: Joi.string().required(),
+    description: Joi.string().required(),
     image: Joi.string().required().pattern(link),
     trailerLink: Joi.string().required().pattern(link),
     thumbnail: Joi.string().required().pattern(link),
-    movieId: Joi.string().required().min(2),
-    nameRU: Joi.string().required().min(2),
-    nameEN: Joi.string().required().min(2)
+    movieId: Joi.string().required().pattern(number),
+    nameRU: Joi.string().required(),
+    nameEN: Joi.string().required()
   }),
 })
 
@@ -38,3 +38,10 @@ module.exports.createUserValidate = celebrate({
     name: Joi.string().min(2).max(30),
   }),
 })
+
+module.exports.updateUserValidate = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    email: Joi.string().required().email(),
+  }),
+});
