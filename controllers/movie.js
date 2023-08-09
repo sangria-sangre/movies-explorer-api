@@ -4,15 +4,10 @@ const ForbiddenError403 = require('../errors/ForbiddenError403');
 const NotFoundError404 = require('../errors/NotFoundError404');
 
 module.exports.getMovies = (req, res, next) => {
-  movieSchema.find({})
+  const currentUserId = req.user._id;
+  movieSchema.find({ owner: currentUserId })
   .then((movies) => {
-    const arr = movies.map((movie) => {
-      if(movie.owner === req.user._id) {
-        return movie;
-      }
-      return;
-    });
-    if(arr) return arr;
+    if(movies) return movies;
     throw new NotFoundError404('404: Данные не найдены');
   })
   .then((movies) => {
