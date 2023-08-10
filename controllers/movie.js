@@ -26,7 +26,7 @@ module.exports.createMovie = (req, res, next) => {
   const { country, director, duration, year, description, image, trailerLink, thumbnail, movieId, nameRU, nameEN } = req.body;
   const owner = req.user._id;
   movieSchema.create({ country, director, duration, year, description, image, trailerLink, thumbnail, movieId, nameRU, nameEN, owner })
-    .then(() => res.status(201).send({ message: 'Фильм добавлен успешно.' }))
+    .then((movie) => res.status(201).send(movie))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(new BadRequestError400('400: Переданы некорректные данные при создании фильма.'));
